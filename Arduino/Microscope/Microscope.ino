@@ -1,3 +1,14 @@
+/*
+Firmware for the Arduino on the OpenLabTools microscope
+
+
+Created 12/07/13
+By James Ritchie
+
+github.com/OpenLabTools/Microscope
+
+*/
+
 #include <Wire.h>
 #include <Adafruit_MotorShield.h>
 #include <AccelStepper.h>
