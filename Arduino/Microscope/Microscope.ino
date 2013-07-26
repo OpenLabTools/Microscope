@@ -42,7 +42,7 @@ void loop() {
     // Reset input str
     scontrol.string_complete = false;
   }
-  stage.loop(); 
+  stage.loop();
 }
 
 void serialEvent() {

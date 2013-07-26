@@ -12,9 +12,15 @@ class Stage
 {
   public:
     Stage();
+    
     void begin();
     void loop();
     void zMove(int steps);
+    
+    static const int up_switch_pin = 2;
+    static const int down_switch_pin = 3;
+    boolean manual_control;
+    void manualControl();
     
   private:
     AccelStepper _z_stepper;
