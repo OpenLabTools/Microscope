@@ -8,6 +8,9 @@
 #include <Adafruit_MotorShield.h>
 #include <AccelStepper.h>
 
+#ifndef Stage_h
+#define Stage_h
+
 class Stage
 {
   public:
@@ -26,4 +29,5 @@ class Stage
     AccelStepper _z_stepper;
 };
   
+#endif
 
