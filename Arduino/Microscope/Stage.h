@@ -18,7 +18,13 @@ class Stage
     
     void begin();
     void loop();
-    void zMove(int steps);
+    void zMove(long steps);
+    void zMoveTo(long position);
+    void calibrate();
+    static const int z_ulimit_switch = 4;
+    static const int z_llimit_switch = 5;
+    boolean calibrated;
+    long z_length;
     
     static const int up_switch_pin = 2;
     static const int down_switch_pin = 3;
