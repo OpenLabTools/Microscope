@@ -34,7 +34,7 @@ const int Stage::z_llimit_switch;
 Stage::Stage() {
   //Initialize AccelStepper object with wrapper functions and parameters.
   _z_stepper = AccelStepper(zForward, zBackward);
-  _z_stepper.setAcceleration(200.0);
+  _z_stepper.setAcceleration(1000.0);
   _z_stepper.setMaxSpeed(1000.0);
   
   calibrated = false;
@@ -136,6 +136,19 @@ void Stage::manualControl()
     manual_control = false;
     zMove(0);
   }
+}
+
+long Stage::getZPosition()
+{
+  if(calibrated)
+  {
+    return _z_stepper.currentPosition();
+  }
+}
+
+long Stage::getZDistanceToGo()
+{
+  return _z_stepper.distanceToGo();
 }
 
 

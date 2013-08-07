@@ -14,22 +14,25 @@
 class Stage
 {
   public:
-    Stage();
     
+    static const int up_switch_pin = 22;
+    static const int down_switch_pin = 24;
+    static const int z_ulimit_switch = 26;
+    static const int z_llimit_switch = 28;
+    
+    boolean manual_control;
+    boolean calibrated;
+    long z_length;
+    
+    Stage();   
     void begin();
     void loop();
     void zMove(long steps);
     void zMoveTo(long position);
     void calibrate();
-    static const int z_ulimit_switch = 4;
-    static const int z_llimit_switch = 5;
-    boolean calibrated;
-    long z_length;
-    
-    static const int up_switch_pin = 2;
-    static const int down_switch_pin = 3;
-    boolean manual_control;
     void manualControl();
+    long getZPosition();
+    long getZDistanceToGo();
     
   private:
     AccelStepper _z_stepper;

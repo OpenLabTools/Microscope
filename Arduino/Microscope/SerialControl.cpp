@@ -6,9 +6,8 @@
 #include "Arduino.h"
 #include "SerialControl.h"
 
-SerialControl::SerialControl(HardwareSerial &serial)
+SerialControl::SerialControl()
 {
-  _serial = &serial; //Copy pointer to Arduino Serial object
   
   //Initialize variables
   string_complete = false;
@@ -19,14 +18,14 @@ SerialControl::SerialControl(HardwareSerial &serial)
 void SerialControl::begin()
 {
   //Open a serial connection
-  _serial->begin(9600);
+  Serial.begin(9600);
 }
 
 void SerialControl::serialEvent()
 {
-  while (_serial->available()) {
+  while (Serial.available()) {
     // get the new byte:
-    char in_char = (char)_serial->read(); 
+    char in_char = (char)Serial.read(); 
     // add it to the inputString:
     if ((str_pos<max_length) && (in_char!='\n'))
     {
@@ -68,10 +67,10 @@ void SerialControl::_processString(){
   }
 
   //Print out the received command and argument
-  _serial->print("Command: ");
-  _serial->println(command);
-  _serial->print("Argument: ");
-  _serial->println(arg);
+  Serial.print("Command: ");
+  Serial.println(command);
+  Serial.print("Argument: ");
+  Serial.println(arg);
 
 }
 

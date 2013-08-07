@@ -11,7 +11,7 @@
 #include "Stage.h"
 
 //Create objects for Microscope functions
-SerialControl scontrol = SerialControl(Serial);
+SerialControl scontrol = SerialControl();
 Stage stage = Stage();
 
 //Calls associated functions and passes arguments for each command
@@ -66,6 +66,25 @@ void handle_command(char* cmd, char* arg)
       Serial.println("ERR: NOT CALIBRATED");
     }
   }
+  else if(strcmp("get_z_position", cmd)==0)
+  {
+    if(stage.calibrated)
+    {
+      Serial.print("Return: ");
+      Serial.println(stage.getZPosition());
+      Serial.println("OK");
+    }
+    else
+    {
+      Serial.println("ERR: NOT CALIBRATED");
+    }
+  }
+  else if(strcmp("get_z_distance_to_go",cmd)==0)
+  {
+    Serial.print("Return: ");
+    Serial.println(stage.getZDistanceToGo());
+    
+  }
   else if(strcmp("is_calibrated", cmd)==0)
   {
     //Test if calibrated
@@ -97,6 +116,11 @@ void loop() {
 void serialEvent() {
   //Attach SerialControl to the Serial event
   scontrol.serialEvent();
+}
+
+void serialEventRun(void){
+  //Hack to fix broken IDE functionality for Due
+  if(Serial.available()) serialEvent();
 }
 
 

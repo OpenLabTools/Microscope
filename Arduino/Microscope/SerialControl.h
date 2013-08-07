@@ -11,7 +11,7 @@
 class SerialControl
 {
   public:
-    static const int max_length = 20;    //Maximum command length
+    static const int max_length = 40;    //Maximum command length
   
     boolean string_complete;             //Flag to indicate command received
   
@@ -21,12 +21,11 @@ class SerialControl
   
     int str_pos; //String position counter
   
-    SerialControl(HardwareSerial &serial);
+    SerialControl();
     void begin();
     void serialEvent();
-  private:
-    HardwareSerial* _serial; //Pointer to Arduino Serial object
-  
+    
+  private:  
     void _processString();
 };
 
