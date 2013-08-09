@@ -70,7 +70,6 @@ void handle_command(char* cmd, char* arg)
   {
     if(stage.calibrated)
     {
-      Serial.print("Return: ");
       Serial.println(stage.getZPosition());
       Serial.println("OK");
     }
@@ -81,9 +80,7 @@ void handle_command(char* cmd, char* arg)
   }
   else if(strcmp("get_z_distance_to_go",cmd)==0)
   {
-    Serial.print("Return: ");
-    Serial.println(stage.getZDistanceToGo());
-    
+    Serial.println(stage.getZDistanceToGo());    
   }
   else if(strcmp("is_calibrated", cmd)==0)
   {
