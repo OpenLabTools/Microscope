@@ -26,13 +26,13 @@ return OK almost immediately.
 
 ### calibrate
 
-*Command*
+**Command**
 
 ```
 calibrate
 ```
 
-*Response*
+**Response**
 
 ```
 Command: calibrate
@@ -47,13 +47,13 @@ positioning will return an error if this has not been run.
 
 ### is_calibrated
 
-*Command*
+**Command**
 
 ```
 is_calibrated
 ```
 
-*Response*
+**Response**
 
 ```
 Command: is_calibrated
@@ -66,13 +66,13 @@ OK
 
 ### get_z_length
 
-*Command*
+**Command**
 
 ```
 get_z_length
 ```
 
-*Response*
+**Response**
 
 ```
 Command: get__z_length
@@ -85,13 +85,13 @@ Returns the total length of the z axis in units of steps.
 
 ### get_z_position 
 
-*Command*
+**Command**
 
 ```
 get_z_position
 ```
 
-*Response*
+**Response**
 
 ```
 Command: get_z_position
@@ -100,4 +100,65 @@ Return: 3651
 OK
 ```
 
-Returns the current z position of the stage, in units of steps, from the bottom of the axis.
+Returns the current z position of the stage, in units of steps, from the 
+bottom of the axis.
+
+### z_move
+
+**Command**
+
+```
+z_move -500
+```
+
+**Response**
+
+```
+Command: z_move
+Argument: -500
+OK
+```
+
+Moves the stage from its current position the given number of steps along 
+the z-axis. Positive for up, negative for down
+
+### z__move_to
+
+**Command**
+
+```
+z_move_to 1500
+```
+
+**Response**
+
+```
+Command: z_move_to
+Argument: 1500
+OK
+```
+
+Moves the stage to an absolute position along the z-axis, measured in
+units of steps from the bottom of the axis. If given a position which is out
+of the range of the axis (i.e. less than 0 or greater than the result of
+'get_z_length'), will return an Out of Range error. 
+
+### get_z_distance_to_go
+
+**Command**
+
+```
+get_z_distance_to_go
+```
+
+**Response**
+
+```
+Command: get_z_distance_to_go
+Argument:
+Return: 130
+OK
+```
+
+Gets the number of steps to go until the stage reaches its current target on
+the z-axis(set by 'z_move' or 'z_move_to').
