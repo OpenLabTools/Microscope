@@ -7,12 +7,15 @@
 #include <Wire.h>
 #include <Adafruit_MotorShield.h>
 #include <AccelStepper.h>
+#include <Adafruit_NeoPixel.h>
 #include "SerialControl.h"
 #include "Stage.h"
+#include "Lighting.h"
 
 //Create objects for Microscope functions
 SerialControl scontrol = SerialControl();
 Stage stage = Stage();
+Lighting lights = Lighting();
 
 //Calls associated functions and passes arguments for each command
 void handle_command(char* cmd, char* arg)
@@ -88,6 +91,24 @@ void handle_command(char* cmd, char* arg)
     Serial.println(stage.calibrated);
     Serial.println("OK");
   }
+  else if(strcmp("set_ring_colour", cmd)==0)
+  {
+    uint32_t colour = strtoul(arg, NULL, 16);
+    lights.setRingColour(colour);
+    Serial.println("OK");
+  }
+  else if(strcmp("set_ring_brightness", cmd)==0)
+  {
+    uint8_t brightness = atoi(arg);
+    lights.setRingBrightness(brightness);
+    Serial.println("OK");
+  }
+  else if(strcmp("set_stage_led_brightness", cmd)==0)
+  {
+    uint8_t brightness = atoi(arg);
+    lights.setStageLEDBrightness(brightness);
+    Serial.println("OK");
+  }
   else
   {
     //Print error message if command unknown.
@@ -99,6 +120,7 @@ void setup() {
   //Initialize
   scontrol.begin();
   stage.begin();
+  lights.begin();
 }
 
 void loop() {
@@ -108,6 +130,7 @@ void loop() {
     scontrol.string_complete = false;
   }
   stage.loop();
+  lights.loop();
 }
 
 void serialEvent() {
