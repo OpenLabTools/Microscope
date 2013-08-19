@@ -14,12 +14,6 @@
 class Stage
 {
   public:
-    
-    static const int up_switch_pin = 22;
-    static const int down_switch_pin = 24;
-    static const int z_ulimit_switch = 26;
-    static const int z_llimit_switch = 28;
-    
     boolean manual_control;
     boolean calibrated;
     long z_length;
