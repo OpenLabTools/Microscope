@@ -10,9 +10,7 @@
 
 class SerialControl
 {
-  public:
-    static const int max_length = 40;    //Maximum command length
-  
+  public:  
     boolean string_complete;             //Flag to indicate command received
   
     char *input_string; //Raw string from serial

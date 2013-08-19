@@ -6,12 +6,14 @@
 #include "Arduino.h"
 #include "SerialControl.h"
 
+#define MAX_LENGTH 40
+
 SerialControl::SerialControl()
 {
   
   //Initialize variables
   string_complete = false;
-  input_string = (char *)malloc(max_length);
+  input_string = (char *)malloc(MAX_LENGTH);
   str_pos = 0;
 }
 
@@ -27,7 +29,7 @@ void SerialControl::serialEvent()
     // get the new byte:
     char in_char = (char)Serial.read(); 
     // add it to the inputString:
-    if ((str_pos<max_length) && (in_char!='\n'))
+    if ((str_pos<MAX_LENGTH) && (in_char!='\n'))
     {
       input_string[str_pos] = in_char;
       str_pos++;
@@ -37,10 +39,10 @@ void SerialControl::serialEvent()
     if (in_char == '\n') {
       string_complete = true;
       // End a string with a null
-      if (str_pos<max_length)
+      if (str_pos<MAX_LENGTH)
         input_string[str_pos]='\0';
       else
-        input_string[max_length-1]='\0';
+        input_string[MAX_LENGTH-1]='\0';
       str_pos = 0;
       _processString();
     }
@@ -53,7 +55,7 @@ void SerialControl::_processString(){
   command = input_string;
   arg = input_string;
 
-  for (int i=0; i<max_length; i++)
+  for (int i=0; i<MAX_LENGTH; i++)
   {
     if (input_string[i]=='\0')
       break;
@@ -73,6 +75,3 @@ void SerialControl::_processString(){
   Serial.println(arg);
 
 }
-
-const int SerialControl::max_length;
-

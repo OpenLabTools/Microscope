@@ -9,6 +9,12 @@
 #include <AccelStepper.h>
 #include "Stage.h"
 
+//Define pins
+#define Z_UP_SWITCH 7
+#define Z_DOWN_SWITCH 6
+#define Z_ULIMIT_SWITCH 5
+#define Z_LLIMIT_SWITCH 4
+
 // Create the motor shield object with the default I2C address
 Adafruit_MotorShield afms = Adafruit_MotorShield();
 
@@ -23,13 +29,6 @@ void zForward() {
 void zBackward() {
   z_motor->onestep(BACKWARD, DOUBLE);
 }
-
-
-const int Stage::up_switch_pin;
-const int Stage::down_switch_pin;
-
-const int Stage::z_ulimit_switch;
-const int Stage::z_llimit_switch;
 
 Stage::Stage() {
   //Initialize AccelStepper object with wrapper functions and parameters.
@@ -46,13 +45,11 @@ void Stage::begin()
   //Initiliaze the motor shield
   afms.begin();
   
-  //Setup pins for limit switches
-  pinMode(z_ulimit_switch, INPUT);
-  pinMode(z_llimit_switch, INPUT);
-  
-  //Setup pins for manual control
-  pinMode(up_switch_pin, INPUT);
-  pinMode(down_switch_pin, INPUT);
+  //Setup pins for input
+  pinMode(Z_ULIMIT_SWITCH, INPUT);
+  pinMode(Z_LLIMIT_SWITCH, INPUT);
+  pinMode(Z_UP_SWITCH, INPUT);
+  pinMode(Z_DOWN_SWITCH, INPUT);
 }
 
 void Stage::loop()
@@ -62,10 +59,10 @@ void Stage::loop()
   manualControl();
   
   //Test limit switches to prevent driving stage past limits
-  if(digitalRead(z_ulimit_switch) && (_z_stepper.distanceToGo() > 0)){
+  if(digitalRead(Z_ULIMIT_SWITCH) && (_z_stepper.distanceToGo() > 0)){
     _z_stepper.move(0);
   }
-  if(digitalRead(z_llimit_switch) && (_z_stepper.distanceToGo() < 0)){
+  if(digitalRead(Z_LLIMIT_SWITCH) && (_z_stepper.distanceToGo() < 0)){
     _z_stepper.move(0);
   }
   
@@ -92,7 +89,7 @@ void Stage::calibrate()
 {
   //Run the motor down until we hit the bottom limit switch
   _z_stepper.setSpeed(-300);
-  while(!digitalRead(z_llimit_switch))
+  while(!digitalRead(Z_LLIMIT_SWITCH))
   {
    _z_stepper.runSpeed();
   }
@@ -102,7 +99,7 @@ void Stage::calibrate()
   
   //Run the motor up until we hit the top limit switch
   _z_stepper.setSpeed(300);
-  while(!digitalRead(z_ulimit_switch))
+  while(!digitalRead(Z_ULIMIT_SWITCH))
   {
     _z_stepper.runSpeed();
   }
@@ -115,8 +112,8 @@ void Stage::calibrate()
 void Stage::manualControl()
 {
   //Allows manual control of the stage position using buttons
-  boolean up_switch_state = digitalRead(up_switch_pin);
-  boolean down_switch_state = digitalRead(down_switch_pin);
+  boolean up_switch_state = digitalRead(Z_UP_SWITCH);
+  boolean down_switch_state = digitalRead(Z_DOWN_SWITCH);
   
   //Do nothing if both switches pressed
   if(down_switch_state && up_switch_state) {
