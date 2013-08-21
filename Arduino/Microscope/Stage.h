@@ -11,24 +11,48 @@
 #ifndef Stage_h
 #define Stage_h
 
+//Define pins
+#define Z_UP_SWITCH 7
+#define Z_DOWN_SWITCH 6
+#define Z_ULIMIT_SWITCH 5
+#define Z_LLIMIT_SWITCH 4
+
+//Define motor selections
+#define X_STEPPER 0
+#define Y_STEPPER 1
+#define Z_STEPPER 2
+
 class Stage
 {
   public:
     boolean manual_control;
     boolean calibrated;
-    long z_length;
+   
     
-    Stage();   
+    Stage();
+    
     void begin();
     void loop();
-    void zMove(long steps);
-    void zMoveTo(long position);
-    void calibrate();
     void manualControl();
-    long getZPosition();
-    long getZDistanceToGo();
+    
+    void calibrate();
+    
+    long getPosition(int stepper);
+    long getDistanceToGo(int stepper);
+    long getLength(int stepper);
+    
+    void Move(int stepper, long steps);
+    void MoveTo(int stepper,long position);
+    
+    
     
   private:
+    long _x_length;
+    long _y_length;
+    long _z_length;  
+  
+    AccelStepper _x_stepper;
+    AccelStepper _y_stepper;
     AccelStepper _z_stepper;
 };
   

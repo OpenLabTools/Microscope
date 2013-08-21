@@ -9,20 +9,29 @@
 #include <AccelStepper.h>
 #include "Stage.h"
 
-//Define pins
-#define Z_UP_SWITCH 7
-#define Z_DOWN_SWITCH 6
-#define Z_ULIMIT_SWITCH 5
-#define Z_LLIMIT_SWITCH 4
-
-// Create the motor shield object with the default I2C address
-Adafruit_MotorShield afms = Adafruit_MotorShield();
+// Create the motor shield objects
+Adafruit_MotorShield bottom_afms = Adafruit_MotorShield(0x60);
+Adafruit_MotorShield top_afms = Adafruit_MotorShield(0x61);
 
 // Create stepper motors for each axis (200 steps per rev)
-Adafruit_StepperMotor *z_motor = afms.getStepper(200, 2); //Z-axis Port 2
+Adafruit_StepperMotor *x_motor = top_afms.getStepper(200,1);
+Adafruit_StepperMotor *y_motor = top_afms.getStepper(200,2);
+Adafruit_StepperMotor *z_motor = bottom_afms.getStepper(200, 2); 
 
 //Wrapper functions around Adafruit stepper objects for use with
 //AccelStepper library
+void xForward() {
+  x_motor->onestep(FORWARD, DOUBLE);
+}
+void xBackward() {
+  x_motor->onestep(BACKWARD, DOUBLE);
+}
+void yForward() {
+  y_motor->onestep(FORWARD, DOUBLE);
+}
+void yBackward() {
+  y_motor->onestep(BACKWARD, DOUBLE);
+}
 void zForward() {
   z_motor->onestep(FORWARD, DOUBLE);
 }
@@ -32,6 +41,15 @@ void zBackward() {
 
 Stage::Stage() {
   //Initialize AccelStepper object with wrapper functions and parameters.
+  
+  _x_stepper = AccelStepper(xForward, xBackward);
+  _x_stepper.setAcceleration(1000.0);
+  _x_stepper.setMaxSpeed(1000.0);
+  
+  _y_stepper = AccelStepper(yForward, yBackward);
+  _y_stepper.setAcceleration(1000.0);
+  _y_stepper.setMaxSpeed(1000.0);
+  
   _z_stepper = AccelStepper(zForward, zBackward);
   _z_stepper.setAcceleration(1000.0);
   _z_stepper.setMaxSpeed(1000.0);
@@ -43,7 +61,8 @@ Stage::Stage() {
 void Stage::begin()
 {
   //Initiliaze the motor shield
-  afms.begin();
+  bottom_afms.begin();
+  top_afms.begin();
   
   //Setup pins for input
   pinMode(Z_ULIMIT_SWITCH, INPUT);
@@ -67,21 +86,35 @@ void Stage::loop()
   }
   
   //Called on every loop to enable non-blocking control of steppers
+  _x_stepper.run();
+  _y_stepper.run();
   _z_stepper.run();
   
 }
 
-void Stage::zMove(long steps)
+void Stage::manualControl()
 {
-  //Move the z stepper motor 
-  _z_stepper.move(steps);
-}
-
-void Stage::zMoveTo(long position)
-{
-  //Move the z stepper to a position
-  if(calibrated){
-    _z_stepper.moveTo(position);
+  //Allows manual control of the stage position using buttons
+  boolean up_switch_state = digitalRead(Z_UP_SWITCH);
+  boolean down_switch_state = digitalRead(Z_DOWN_SWITCH);
+  
+  //Do nothing if both switches pressed
+  if(down_switch_state && up_switch_state) {
+    manual_control = false;
+    Move(Z_STEPPER, 0);
+  }
+  else if(up_switch_state) {
+    manual_control = true;
+    Move(Z_STEPPER, 1000);    
+  }
+  else if(down_switch_state) {
+    manual_control = true;
+    Move(Z_STEPPER, -1000);
+  }
+  else if(manual_control) {
+    //Prevents overriding of serial commands
+    manual_control = false;
+    Move(Z_STEPPER, 0);
   }
 }
 
@@ -105,47 +138,87 @@ void Stage::calibrate()
   }
   _z_stepper.move(0);
   _z_stepper.run();
-  z_length = _z_stepper.currentPosition(); //Take this position as the length of the z-axis
+  _z_length = _z_stepper.currentPosition(); //Take this position as the length of the z-axis
   calibrated = true; //Set flag as calibrated.
 }
 
-void Stage::manualControl()
-{
-  //Allows manual control of the stage position using buttons
-  boolean up_switch_state = digitalRead(Z_UP_SWITCH);
-  boolean down_switch_state = digitalRead(Z_DOWN_SWITCH);
-  
-  //Do nothing if both switches pressed
-  if(down_switch_state && up_switch_state) {
-    manual_control = false;
-    zMove(0);
-  }
-  else if(up_switch_state) {
-    manual_control = true;
-    zMove(1000);    
-  }
-  else if(down_switch_state) {
-    manual_control = true;
-    zMove(-1000);
-  }
-  else if(manual_control) {
-    //Prevents overriding of serial commands
-    manual_control = false;
-    zMove(0);
-  }
-}
-
-long Stage::getZPosition()
+long Stage::getPosition(int stepper)
 {
   if(calibrated)
   {
-    return _z_stepper.currentPosition();
+    switch(stepper) {
+      case X_STEPPER:
+        return _x_stepper.currentPosition();
+        break;
+      case Y_STEPPER:
+        return _y_stepper.currentPosition();
+        break;
+      case Z_STEPPER:
+        return _z_stepper.currentPosition();
+        break;      
+    }
   }
 }
 
-long Stage::getZDistanceToGo()
+long Stage::getDistanceToGo(int stepper)
 {
-  return _z_stepper.distanceToGo();
+  switch(stepper) {
+    case X_STEPPER:
+      return _x_stepper.distanceToGo();
+      break;
+    case Y_STEPPER:
+      return _y_stepper.distanceToGo();
+      break;
+    case Z_STEPPER:
+      return _z_stepper.distanceToGo();
+      break;      
+  }
 }
 
+long Stage::getLength(int stepper)
+{
+  switch(stepper) {
+    case X_STEPPER:
+      return _x_length;
+      break;
+    case Y_STEPPER:
+      return _y_length;
+      break;
+    case Z_STEPPER:
+      return _z_length;
+      break;      
+  }
+}
 
+void Stage::Move(int stepper, long steps)
+{
+  switch(stepper) {
+    case X_STEPPER:
+      _x_stepper.move(steps);
+      break;
+    case Y_STEPPER:
+      _y_stepper.move(steps);
+      break;
+    case Z_STEPPER:
+      _z_stepper.move(steps);
+      break;      
+  }
+}
+
+void Stage::MoveTo(int stepper, long position)
+{
+  //Move the z stepper to a position
+  if(calibrated){
+    switch(stepper) {
+      case X_STEPPER:
+        _x_stepper.moveTo(position);
+        break;
+      case Y_STEPPER:
+        _y_stepper.moveTo(position);
+        break;
+      case Z_STEPPER:
+        _z_stepper.moveTo(position);
+        break;      
+    }
+  }
+}
