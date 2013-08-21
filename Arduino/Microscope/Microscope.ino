@@ -100,7 +100,7 @@ void handle_command(char* cmd, char* arg)
       Serial.println("ERR: NOT CALIBRATED");
     }
   }
-  else if(cmdString.endsWith("z_get_distance_to_go"))
+  else if(cmdString.endsWith("_get_distance_to_go"))
   {
     Serial.println(stage.getDistanceToGo(axis));    
   }
@@ -152,6 +152,54 @@ void loop() {
   stage.loop();
   lights.loop();
   
+  if(stage.re_selection_changed) {
+    //Update the screen if a different axis has been selected with the rotary encoder.    
+    String message;
+    
+    if(stage.calibrated){
+      message = String(stage.getPosition(stage.re_selection));
+    }
+    else{
+      message = String("Not Calibrated");
+    }
+    switch(stage.re_selection){
+      //Get the correct prefix
+      case X_STEPPER:
+        message = "X:" + message;
+        break;
+      case Y_STEPPER:
+        message = "Y:" + message;
+        break;
+      case Z_STEPPER:
+        message = "Z:" + message;
+        break;
+    }
+    lcd.clear();
+    lcd.print(message);
+    
+    //Unset changed flag
+    stage.re_selection_changed = 0;
+  }
+  
+  if(stage.getDistanceToGo(stage.re_selection)==0) {
+    //Update the screen with the new position when the motor stops
+    
+    //Clear the screen after the prefix
+    lcd.setCursor(2,0);
+    for (int i=2;i<16;i++) {
+      lcd.print("H");
+    }
+    
+    //Print position as before, but this time after prefix
+    lcd.setCursor(2,0);
+    if(stage.calibrated){      
+      lcd.print(stage.getPosition(stage.re_selection));
+    }
+    else{
+      lcd.print("Not Calibrated");
+    }
+    
+  }
 }
 
 void serialEvent() {

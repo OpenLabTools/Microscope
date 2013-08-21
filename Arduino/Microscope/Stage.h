@@ -16,6 +16,9 @@
 #define Z_DOWN_SWITCH 6
 #define Z_ULIMIT_SWITCH 5
 #define Z_LLIMIT_SWITCH 4
+#define ROTARY_ENCODER_CLOCKWISE 2
+#define ROTARY_ENCODER_ANTICLOCKWISE 1
+#define ROTARY_ENCODER_SWITCH 0
 
 //Define motor selections
 #define X_STEPPER 0
@@ -28,6 +31,12 @@ class Stage
     boolean manual_control;
     boolean calibrated;
    
+    int re_selection;
+    long re_debounce_time;
+    int re_last_reading;
+    int re_state;
+    int re_last_state;
+    int re_selection_changed;
     
     Stage();
     
