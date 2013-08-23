@@ -16,8 +16,8 @@
 #define Z_DOWN_SWITCH 6
 #define Z_ULIMIT_SWITCH 5
 #define Z_LLIMIT_SWITCH 4
-#define ROTARY_ENCODER_CLOCKWISE 2
-#define ROTARY_ENCODER_ANTICLOCKWISE 1
+#define ROTARY_ENCODER_A 1
+#define ROTARY_ENCODER_B 2
 #define ROTARY_ENCODER_SWITCH 0
 
 //Define motor selections
@@ -37,6 +37,7 @@ class Stage
     int re_state;
     int re_last_state;
     int re_selection_changed;
+    int re_a_last;
     
     Stage();
     
