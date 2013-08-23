@@ -181,19 +181,17 @@ void loop() {
     stage.re_selection_changed = 0;
   }
   
-  if(stage.getDistanceToGo(stage.re_selection)==0) {
+  if(stage.getDistanceToGo(X_STEPPER)==0 && stage.getDistanceToGo(Y_STEPPER)==0 && stage.getDistanceToGo(Z_STEPPER)==0) {
     //Update the screen with the new position when the motor stops
-    
-    //Clear the screen after the prefix
-    lcd.setCursor(2,0);
-    for (int i=2;i<16;i++) {
-      lcd.print("H");
-    }
     
     //Print position as before, but this time after prefix
     lcd.setCursor(2,0);
     if(stage.calibrated){      
-      lcd.print(stage.getPosition(stage.re_selection));
+      String position = String(stage.getPosition(stage.re_selection));
+      lcd.print(position);
+      for(int i = position.length() + 2; i<16;i++) {
+        lcd.print(" ");
+      }
     }
     else{
       lcd.print("Not Calibrated");
