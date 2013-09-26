@@ -1,0 +1,216 @@
+% Tutorial 2:
+% Programs Analysis
+
+
+
+\documentclass[a4paper]{article}
+
+\usepackage{hyperref}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage[ruled,noend,vlined]{algorithm2e}
+\usepackage{listings}
+\usepackage{pifont}
+\usepackage{indentfirst}
+
+\lstset{
+	backgroundcolor=\color{white},
+	basicstyle=\footnotesize,
+	breakatwhitespace=false,
+	breaklines=true,
+	captionpos=b,
+	commentstyle=\itshape\color{red},
+	frame=L,
+	keepspaces=true,
+	columns=flexible,
+	keywordstyle=\bfseries\color{Blue},
+	language=C++,
+	numbers=left,
+	numbersep=7pt,
+	numberstyle=\tiny\color{Gray},
+	rulecolor=\color{black},
+	showspaces=false,
+	showstringspaces=false,
+	stepnumber=1,
+	stringstyle=\color{YellowOrange},
+	tabsize=2,
+	title=\lstname
+}
+
+\begin{document}
+	
+	\title{Automation Tutorial 2: Code Description}
+	\date{8th September 2013}
+	\author{Marco Selvi}
+	\maketitle
+	
+	
+	\section*{Aims}
+	
+		In this tutorial we will describe in more details what the code written for the microscope's automation actually does.
+		All programs have been written in C++, with the use of different libraries for image processing and serial port communication.
+		In the next section we list all packages and libraries necessary for the correct compilation and execution of the programs themselves.
+		
+		Remember however that, while this program will compile and run on any platform, it is meant to work on the Raspberry Pi.
+		This is in particular obvious from the restriction for image capture using the program RaspiStill, available only on the Pi.
+		If run on any other platform that does not have RaspiStill as a program, the routine will run correctly until the first invocation of 'raspistill', and then crash.
+	
+	\section*{Libraries and Packages}
+	
+		Here we list all packages necessary for the correct execution of the program, with a short description for each.
+		Terminal commands for obtaining all packages are at the end of this section.
+	 
+	\subsection*{Imaging: CoolImage Library}
+	
+			For the programs that follow we will use the Cool Image Library, obtainable from \href{http://cimg.sourceforge.net/}{this website}.
+			This is a template library, contained all in one header file.
+			It is very easy to use and efficient at run-time, but takes quite a while to compile on the Raspberry Pi (it contains approximately 45,000 lines of code).
+			To use it, simply include the "CImg.h" file downloadable from the website in the heading of your code and it will work at compile time. 
+			See any example of programs in the next sections to check where to include it.
+			
+			\begin{quote}
+				\emph{We suggest creating a dummy .cpp file containing the library itself and the definition of the components used, so that it can be compiled separately and then linked as an object.
+				A header file of similar type might be useful also.
+				We have not considered this possibility until the writing of this tutorial because software development was done on a computer that could handle compilation of the CImg.h file easily, but if you plan to do software development on the Pi this is definitely an option to explore.}
+			\end{quote}
+
+	\subsection*{Serial Communication: Boost Asio Library}
+			
+			Communication over the serial port is done using the Boost Asio library (see \href{http://www.boost.org/doc/libs/1_54_0/doc/html/boost_asio.html}{here} for documentation).
+			This library provides rather simple to implement (if hard to devise) communication with the Arduino.
+			Opening a serial port with this library allows the user to use the serial communication as a stream not dissimilar from the 'iostream' available from the C++ inbuilt libraries.
+			Commands can be written to the stream and outputs can be read from it.
+			However...
+			
+			A NOTE of caution: the non-asynchronous functions used to read from the serial port block until the buffer used to read into is full (so they must read at least one character, if the buffer used if of such size).
+			If you are developing your own software using this library, be sure that whenever a 'read' function is called on the serial port stream there will be some output to read.
+			Otherwise, your program will block forever.
+			Alternatively, try using the asynchronous read functions provided in the boost libraries.
+			If you can figure out how.
+			
+	\subsection*{Terminal Commands to Install Libraries}
+	
+			You will need the 'imagemagick' package to handle window display from the CoolImage library through the 'CImgDisplay' class.
+			
+			You will also need to make sure that the X11 video libraries are installed.
+			These are generally already installed in Raspbian, but checking can't hurt.
+			
+			As we said, the CoolImage library is used by simply including the header file, so no package is installed for it.
+			
+			Just to be on the safe side, or if you want to do some testing, you may install the Python imaging library as well.
+			It is not as efficient as the CoolImage library, so since our programs are rather speed-sensitive we opted for the latter, but it is a good first-stage development tool.
+			
+			So the commands to use to install everything are
+			
+			\begin{quote}
+				sudo apt-get update
+				sudo apt-get install libx11-dev imagemagick python-imaging libboost-all-dev
+			\end{quote}
+			
+			And you are done installing stuff.
+			Now for the real programming...
+			
+			
+	\section*{Edge Recognition}
+	
+		Here we report an implementation of the Canny Edge Recognition \href{http://en.wikipedia.org/wiki/Canny_edge_detector}{algorithm} as an example of how to do image processing with the CoolImage library.
+		The relevant code files are found \href{https://github.com/OpenLabTools/Microscope/tree/master/Raspberry%20Pi}{here}.
+		
+		As it can be seen from a quick analysis, the 'edges.cpp' file is a very basic user interface, while all the computation is done in the header file `edgedetection\_class.h'.
+		We will therefore skip a detailed analysis of the former, and concentrate on what the latter does.
+		
+	\subsection*{edgedetection\_class.h}
+	
+			This file handles all the processes needed to detect edges in an image using the Canny Edge Detection algorithm mentioned above.
+			We use `.jpg' files because they have only one layer and are therefore more easily analysed.
+			The CoolImage library can of course work with multi-layer images such as `.bmp' as well, but the code will need heavy remodeling to work with more complex images.
+			To make your life easier, just convert images to `.jpg'.
+			Edges don't need multi-layering anyway.
+			
+			The file `edgedetection\_class.h' (as the name suggests) containes a class whose methods do everything in the edge detection algorithm.
+			The method invoked by `edges.cpp' is `canny\_edge\_detection()' that takes no arguments.
+			This method then invokes all other methods in the class.
+			Check all other methods in the complete header file at the link mentioned above.
+			We don't report them here to avoid clutter.
+			
+			This is the code for the principal method, with relevant comments.
+			The comments should be self explanatory.
+						
+		\lstinputlisting[firstline=194, lastline=327, firstnumber=194]{edgedetection_class.h}
+			
+	\section*{Microscope Control}
+	
+		Now we can start tackling more complex tasks, useful for the control of the microscope.
+		In particular, we need to make all functions and methods `cooperate' efficiently and as fast as possible.
+		The algorithm used in this program is available in the Tutorial 1 PDF.
+		Here we analyse the methods used in the steps of the algorithm.
+		
+	\subsection*{Image Acquisition}
+	
+			To acquire images to be used in the focusing algorithm, we use the inbuilt `raspistill' program available with the Raspberry Pi camera libraries.
+			To do so, we simply call a `system()' function, which allows to call terminal programs from within a C++ program.
+			
+		\begin{lstlisting}
+		system("raspistill -n -w 480 -h 360 -o test.jpg");
+		\end{lstlisting}
+			
+	\subsection*{Image Analysis}
+	
+			We use the CImg library to open the images, and the use the focusing formula contained in this method to analyse them.
+			
+		\lstinputlisting[firstline=472, lastline=508, firstnumber=472]{autofocus_class.h}
+			
+			This is used to compute a focusing value for each picture taken with `raspistill'.
+			Then the program uses these values in the previous algorithm to decide what to do.
+			
+	\subsection*{Arduino Control}
+	
+			To control the Arduino, we use the following method.
+			
+		\lstinputlisting[firstline=1150, lastline=1356, firstnumber=1150]{autofocus_class.h}
+
+			The commands we pass are prebuilt in the code loaded on the Arduino, available \href{https://github.com/OpenLabTools/Microscope/tree/master/Arduino}{here}.
+			What they do is pretty straightforward, and at the link above a full description of all the commands available is provided.
+			Note that we use the `boost::asio::read\_some()' and the `boost::asio::read\_until()' functions to  read the output from the Arduino and save it in strings we can use to interpret it.
+			It is important to make sure that every time we read an output, there is an output to read. 
+			Otherwise these functions will block.
+			For a complete documentation of these functions check the links available \href{http://www.boost.org/doc/libs/1_54_0/doc/html/boost_asio/overview/serial\_ports.html}{here}.
+			Other formulas are available for the usage of Arduino controls from the main program.
+			Check the full code for details.
+			They all contain the necessary comments to understand their functionality.
+			
+	\subsection*{Algorithm Implementation}
+	
+			The implementation of the tuning algorithm is in this function.
+			
+		\lstinputlisting[firstline=587, lastline=794, firstnumber=587]{autofocus_class.h}
+			
+			The passages are directly correlated to the algorithm in Tutorial 1.
+			We use a (rather arbitrary) minimum number of steps for each objective, that should give a sufficient resolution to find a focus point while disregarding changes due to noise.
+			We also use an acceptance threshold (default is 99\%) on the focus value, to account for noise influence.
+			Code is available for a more automated focusing program in the file \href{https://github.com/OpenLabTools/Microscope/tree/master/Raspberry\%20Pi}{focus\_everything.h}.
+			For more details check the comments on the code provided.
+			
+	\subsection*{Other Files}
+	
+			The file `focus\_everything.h' implements different usages of the autofocus class.
+			Again check comments for descriptions.
+			
+			The file `autofocus\_class\_initialisation.h' contains an implementation of instructions to initialise the autofocus class.
+			It also provides the possibility to use a default initialisation, that will assume the objective in use on the microscope is a `4x'.
+			
+			The file `focus\_everything.cpp' is the main file that puts together all the header files and provides the user interface through terminal.
+			Through this file it is possible to use all methods provided by the autofocus class recursively, and decide whether to save the output of each operation.
+			
+			The `Makefile' provided allows to compile and launch all programs available.
+			The flags implemented here are necessary for the correct usage of the boost libraries and the CImg library, linking all other useful libraries.
+			
+			All files can be found \href{https://github.com/OpenLabTools/Microscope/tree/master/Raspberry\%20Pi}{here}, with relevant comments describing all the functionalities.
+			
+			
+		
+		
+		
+		
+		
+		
+\end{document}
