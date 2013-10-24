@@ -16,9 +16,9 @@
 #define Z_DOWN_SWITCH 6
 #define Z_ULIMIT_SWITCH 5
 #define Z_LLIMIT_SWITCH 4
-#define ROTARY_ENCODER_A 1
-#define ROTARY_ENCODER_B 2
-#define ROTARY_ENCODER_SWITCH 0
+#define ROTARY_ENCODER_A 8
+#define ROTARY_ENCODER_B 9
+#define ROTARY_ENCODER_SWITCH 10
 
 //Define motor selections
 #define X_STEPPER 0
