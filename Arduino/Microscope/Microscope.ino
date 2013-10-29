@@ -152,52 +152,9 @@ void loop() {
   stage.loop();
   lights.loop();
   
-  if(stage.re_selection_changed) {
-    //Update the screen if a different axis has been selected with the rotary encoder.    
-    String message;
-    
-    if(stage.calibrated){
-      message = String(stage.getPosition(stage.re_selection));
-    }
-    else{
-      message = String("Not Calibrated");
-    }
-    switch(stage.re_selection){
-      //Get the correct prefix
-      case X_STEPPER:
-        message = "X:" + message;
-        break;
-      case Y_STEPPER:
-        message = "Y:" + message;
-        break;
-      case Z_STEPPER:
-        message = "Z:" + message;
-        break;
-    }
-    lcd.clear();
-    lcd.print(message);
-    
-    //Unset changed flag
-    stage.re_selection_changed = 0;
-  }
   
-  if(stage.getDistanceToGo(X_STEPPER)==0 && stage.getDistanceToGo(Y_STEPPER)==0 && stage.getDistanceToGo(Z_STEPPER)==0) {
-    //Update the screen with the new position when the motor stops
-    
-    //Print position as before, but this time after prefix
-    lcd.setCursor(2,0);
-    if(stage.calibrated){      
-      String position = String(stage.getPosition(stage.re_selection));
-      lcd.print(position);
-      for(int i = position.length() + 2; i<16;i++) {
-        lcd.print(" ");
-      }
-    }
-    else{
-      lcd.print("Not Calibrated");
-    }
-    
-  }
+  
+  
 }
 
 void serialEvent() {
