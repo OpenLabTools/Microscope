@@ -14,23 +14,29 @@ Adafruit_MotorShield bottom_afms = Adafruit_MotorShield(0x60);
 Adafruit_MotorShield top_afms = Adafruit_MotorShield(0x61);
 
 // Create stepper motors for each axis (200 steps per rev)
-Adafruit_StepperMotor *x_motor = bottom_afms.getStepper(200,1);
-Adafruit_StepperMotor *y_motor = top_afms.getStepper(200,2);
+Adafruit_StepperMotor *xy_a_motor = top_afms.getStepper(200,1);
+Adafruit_StepperMotor *xy_b_motor = top_afms.getStepper(200,2);
 Adafruit_StepperMotor *z_motor = bottom_afms.getStepper(200, 2); 
 
 //Wrapper functions around Adafruit stepper objects for use with
 //AccelStepper library
 void xForward() {
-  x_motor->onestep(FORWARD, DOUBLE);
+  xy_a_motor->onestep(FORWARD, DOUBLE);
+  xy_b_motor->onestep(FORWARD, DOUBLE);
 }
 void xBackward() {
-  x_motor->onestep(BACKWARD, DOUBLE);
+  xy_a_motor->onestep(BACKWARD, DOUBLE);
+  xy_b_motor->onestep(BACKWARD, DOUBLE);
+  
 }
 void yForward() {
-  y_motor->onestep(FORWARD, DOUBLE);
+  xy_a_motor->onestep(FORWARD, DOUBLE);
+  xy_b_motor->onestep(BACKWARD, DOUBLE):
+  
 }
 void yBackward() {
-  y_motor->onestep(BACKWARD, DOUBLE);
+  xy_a_motor->onestep(BACKWARD, DOUBLE);
+  xy_b_motor->onestep(FORWARD, DOUBLE);
 }
 void zForward() {
   z_motor->onestep(FORWARD, DOUBLE);
