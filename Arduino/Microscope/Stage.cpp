@@ -55,8 +55,6 @@ Stage::Stage() {
   _z_stepper.setMaxSpeed(1000.0);
   
   calibrated = false;
-  re_selection_changed = 1;
-  re_a_last = HIGH;
   
 }
 
@@ -71,10 +69,7 @@ void Stage::begin()
   pinMode(Z_LLIMIT_SWITCH, INPUT_PULLUP);
   pinMode(Z_UP_SWITCH, INPUT_PULLUP);
   pinMode(Z_DOWN_SWITCH, INPUT_PULLUP);
-  
-  pinMode(ROTARY_ENCODER_SWITCH, INPUT_PULLUP);
-  pinMode(ROTARY_ENCODER_A, INPUT_PULLUP);
-  pinMode(ROTARY_ENCODER_B, INPUT_PULLUP);
+
 }
 
 void Stage::loop()
@@ -122,41 +117,6 @@ void Stage::manualControl()
     manual_control = false;
     Move(Z_STEPPER, 0);
   }
-  
-  //Rotary Encoder Axis Selection
-  //Debounce input, check if going from high to low, then cycle selection.
-  int re_reading = digitalRead(ROTARY_ENCODER_SWITCH);
- 
-  if(re_reading != re_last_reading){
-    re_debounce_time = millis();
-  }  
-  if ((millis() - re_debounce_time) > 50) {
-    re_state = re_reading;
-    if((re_state == 0) && (re_last_state == 1)) {
-      if(re_selection == Z_STEPPER) {
-        re_selection = X_STEPPER;
-      }
-      else {
-        re_selection++;
-      }
-      re_selection_changed = 1;      
-    }
-    re_last_state=re_state;
-  }
-  
-  re_last_reading = re_reading;
-  
-  //Rotary Encoder rotation reading
-  int n = digitalRead(ROTARY_ENCODER_A);
-  if ((re_a_last == HIGH) && (n == LOW)) {
-    if (digitalRead(ROTARY_ENCODER_B) == HIGH) {
-      Move(re_selection, -1);
-    }
-    else {
-      Move(re_selection, 1);
-    }
-  }
-  re_a_last = n;
   
 }
 

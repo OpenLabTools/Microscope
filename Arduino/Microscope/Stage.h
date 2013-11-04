@@ -30,15 +30,7 @@ class Stage
   public:
     boolean manual_control;
     boolean calibrated;
-   
-    int re_selection;
-    long re_debounce_time;
-    int re_last_reading;
-    int re_state;
-    int re_last_state;
-    int re_selection_changed;
-    int re_a_last;
-    
+      
     Stage();
     
     void begin();
