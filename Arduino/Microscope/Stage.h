@@ -49,13 +49,25 @@ class Stage
     
     
   private:
+  
+    long _x_pos;
+    long _y_pos;
+    long _z_pos;
+  
     long _x_length;
     long _y_length;
-    long _z_length;  
+    long _z_length;
+    
+    long _x_target;
+    long _z_target;
+    long _y_target;
+    
+    long _z_last_step;
+    long _xy_last_step;
+    
+    long _z_interval;
+    long _xy_interval;
   
-    AccelStepper _x_stepper;
-    AccelStepper _y_stepper;
-    AccelStepper _z_stepper;
 };
   
 #endif
