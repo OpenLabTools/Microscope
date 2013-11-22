@@ -39,7 +39,7 @@ void Stage::begin()
   _y_pos = 0;
   _z_pos = 0;
   
-  _xy_interval = 30;
+  _xy_interval = 15;
   _z_interval = 1;
 
 }
@@ -61,12 +61,12 @@ void Stage::loop()
   //Called on every loop to enable non-blocking control of steppers
   if((millis()-_z_last_step)>_z_interval){
     if((_z_target-_z_pos)>0){
-      z_motor->onestep(FORWARD, DOUBLE);
+      z_motor->onestep(FORWARD, INTERLEAVE);
       _z_last_step = millis();
       _z_pos++;
     }
     else if((_z_target-_z_pos)<0){
-       z_motor->onestep(BACKWARD, DOUBLE);
+       z_motor->onestep(BACKWARD, INTERLEAVE);
        _z_last_step = millis();
        _z_pos--;
     }
@@ -76,57 +76,57 @@ void Stage::loop()
     
     if((_x_target-_x_pos)>0 && (_y_target-_y_pos)>0){
       //Move up and right
-      xy_a_motor->onestep(FORWARD, DOUBLE);
+      xy_a_motor->onestep(FORWARD, INTERLEAVE);
       _xy_last_step = millis();
       _x_pos++;
       _y_pos++;  
     }
     else if((_x_target-_x_pos)>0 && (_y_target-_y_pos)<0){
       //Move down and right
-      xy_b_motor->onestep(FORWARD, DOUBLE);
+      xy_b_motor->onestep(FORWARD, INTERLEAVE);
       _xy_last_step = millis();
       _x_pos++;
       _y_pos--;  
     }
      else if((_x_target-_x_pos)<0 && (_y_target-_y_pos)>0){
       //Move up and left
-      xy_b_motor->onestep(BACKWARD, DOUBLE);
+      xy_b_motor->onestep(BACKWARD, INTERLEAVE);
       _xy_last_step = millis();
       _x_pos--;
       _y_pos++;
     }
      else if((_x_target-_x_pos)<0 && (_y_target-_y_pos)<0){
       //Move down and left
-      xy_a_motor->onestep(BACKWARD, DOUBLE);
+      xy_a_motor->onestep(BACKWARD, INTERLEAVE);
       _xy_last_step = millis();
       _x_pos--;
       _y_pos--;  
     }
      else if((_x_target-_x_pos)==0 && (_y_target-_y_pos)>0){
       //Move up
-      xy_a_motor->onestep(FORWARD, DOUBLE);
-      xy_b_motor->onestep(BACKWARD, DOUBLE);
+      xy_a_motor->onestep(FORWARD, INTERLEAVE);
+      xy_b_motor->onestep(BACKWARD, INTERLEAVE);
       _xy_last_step = millis(); 
       _y_pos++;     
     }
     else if((_x_target-_x_pos)==0 && (_y_target-_y_pos)<0){
       //Move down
-      xy_a_motor->onestep(BACKWARD, DOUBLE);
-      xy_b_motor->onestep(FORWARD, DOUBLE);
+      xy_a_motor->onestep(BACKWARD, INTERLEAVE);
+      xy_b_motor->onestep(FORWARD, INTERLEAVE);
       _xy_last_step = millis();
       _y_pos--; 
     }
     else if((_x_target-_x_pos)>0 && (_y_target-_y_pos)==0){
       //Move right
-      xy_a_motor->onestep(FORWARD, DOUBLE);
-      xy_b_motor->onestep(FORWARD, DOUBLE);
+      xy_a_motor->onestep(FORWARD, INTERLEAVE);
+      xy_b_motor->onestep(FORWARD, INTERLEAVE);
       _xy_last_step = millis();
       _x_pos++;      
     }
     else if((_x_target-_x_pos)<0 && (_y_target-_y_pos)==0){
       //Move left
-      xy_a_motor->onestep(BACKWARD, DOUBLE);
-      xy_b_motor->onestep(BACKWARD, DOUBLE);
+      xy_a_motor->onestep(BACKWARD, INTERLEAVE);
+      xy_b_motor->onestep(BACKWARD, INTERLEAVE);
       _xy_last_step = millis();
       _x_pos--;   
     }
