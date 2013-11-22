@@ -22,6 +22,7 @@ void Lighting::begin()
 {
   ring.begin();
   pinMode(STAGE_LED, OUTPUT);
+  setStageLEDBrightness(255);
 }
 
 void Lighting::loop()
