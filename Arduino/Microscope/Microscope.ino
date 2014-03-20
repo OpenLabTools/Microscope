@@ -12,6 +12,7 @@
 #include "SerialControl.h"
 #include "Stage.h"
 #include "Lighting.h"
+#include "TouchScreen.h"
 
 //Create objects for Microscope functions
 SerialControl scontrol = SerialControl();

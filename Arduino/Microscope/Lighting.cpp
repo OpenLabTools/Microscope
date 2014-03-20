@@ -44,7 +44,7 @@ void Lighting::setRingBrightness(uint8_t b)
 
 void Lighting::setStageLEDBrightness(uint8_t b)
 {
-  analogWrite(DAC0, b);
+  //analogWrite(DAC0, b);
 }
 
 
