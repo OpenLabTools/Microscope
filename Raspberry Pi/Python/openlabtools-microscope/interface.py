@@ -106,7 +106,7 @@ class Microscope:
 
     def set_ring_colour(self, colour):
         """Set the colour of the ring LED"""
-        command = 'set_ring_colour ' + str(colour) + '\n'
+        command = 'set_ring_colour ' + colour + '\n'
         self.run_command(command)
 
     def set_ring_brightness(self, brightness):
