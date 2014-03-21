@@ -73,7 +73,7 @@ class WormTracker():
         self.draw_contour = bool(cv2.getTrackbarPos('Contour', 'Preview'))
         self.canny = bool(cv2.getTrackbarPos('Canny', 'Preview'))
         self.upper_canny = cv2.getTrackbarPos('Upper', 'Preview')
-        self.lower = cv2.getTrackbarPos('Lower', 'Preview')
+        self.lower_canny = cv2.getTrackbarPos('Lower', 'Preview')
 
     def find_worm(self):
         """Threshold and contouring algorithm to find centroid of worm"""
