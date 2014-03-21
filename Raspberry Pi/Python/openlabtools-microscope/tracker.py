@@ -47,6 +47,7 @@ class WormTracker():
         cv2.createTrackbar('Closing Rounds', 'Preview', 0, 10, self.nothing)
         cv2.createTrackbar('Margin', 'Preview', 0, 200, self.nothing)
         cv2.createTrackbar('Step Size', 'Preview', 0, 20, self.nothing)
+        cv2.createTrackbar('Contour', 'Preview', 0, 1, self.nothing)
 
         #Set default values
         cv2.setTrackbarPos('Threshold Value', 'Preview', 100)
@@ -64,6 +65,7 @@ class WormTracker():
         self.closing_rounds = cv2.getTrackbarPos('Closing Rounds', 'Preview')
         self.margin = cv2.getTrackbarPos('Margin', 'Preview')
         self.step_size = cv2.getTrackbarPos('Step Size', 'Preview')
+        self.draw_contour = bool(cv2.getTrackbarPos('Contour', 'Preview'))
 
     def find_worm(self):
         """Threshold and contouring algorithm to find centroid of worm"""
@@ -124,6 +126,10 @@ class WormTracker():
     def update_gui(self):
         if self.show_threshold:
             self.img = cv2.cvtColor(self.img_thresh, cv2.COLOR_GRAY2BGR)
+
+        if self.draw_contour:
+            self.img = cv2.drawContours(self.img, [self.worm],
+                                        -1, (255, 0, 0), 1)
 
         #Draw markers for centroid and boundry
         cv2.circle(self.img, (self.x, self.y), 5, (0, 0, 255), -1)
