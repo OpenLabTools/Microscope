@@ -51,6 +51,8 @@ class WormTracker():
         cv2.createTrackbar('Canny', 'Preview', 0, 1, self.nothing)
         cv2.createTrackbar('Upper', 'Preview', 0, 255, self.nothing)
         cv2.createTrackbar('Lower', 'Preview', 0, 255, self.nothing)
+        cv2.createTrackbar('PolyDP', 'Preview', 0, 1, self.nothing)
+        cv2.createTrackbar('Precision', 'Preview', 0, 100, self.nothing)
 
         #Set default values
         cv2.setTrackbarPos('Threshold Value', 'Preview', 100)
@@ -74,6 +76,8 @@ class WormTracker():
         self.canny = bool(cv2.getTrackbarPos('Canny', 'Preview'))
         self.upper_canny = cv2.getTrackbarPos('Upper', 'Preview')
         self.lower_canny = cv2.getTrackbarPos('Lower', 'Preview')
+        self.poly_dp = bool(cv2.getTrackbarPos('PolyDP', 'Preview'))
+        self.precision = cv2.getTrackbarPos('Epsilon', 'Preview')
 
     def find_worm(self):
         """Threshold and contouring algorithm to find centroid of worm"""
@@ -107,6 +111,10 @@ class WormTracker():
             if area > worm_area:
                 self.worm = contour
                 worm_area = area
+
+        if self.poly_dp:
+            worm = cv2.approxPolyDP(self.worm, self.precision, True)
+            self.worm = worm
 
         #Compute the centroid of the worm contour
         moments = cv2.moments(self.worm)
