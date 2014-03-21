@@ -86,12 +86,12 @@ class WormTracker():
         self.img_gray = cv2.cvtColor(self.img, cv2.COLOR_BGR2GRAY)
 
         if self.adaptive:
-            self.img_thesh = cv2.adaptiveThreshold(self.img, 255,
+            self.img_thesh = cv2.adaptiveThreshold(self.img_gray, 255,
                                                    cv2.ADAPTIVE_THRESH_MEAN_C,
                                                    cv2.THRESH_BINARY_INV, 3,
                                                    self.threshold)
         elif self.canny:
-            self.img_thresh = cv2.Canny(self.img, self.lower_canny,
+            self.img_thresh = cv2.Canny(self.img_gray, self.lower_canny,
                                         self.upper_canny)
         else:
             #Threshold
