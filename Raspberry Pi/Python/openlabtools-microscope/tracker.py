@@ -58,7 +58,7 @@ class WormTracker():
         cv2.setTrackbarPos('Margin', 'Preview', 100)
         cv2.setTrackbarPos('Step Size', 'Preview', 2)
         cv2.setTrackbarPos('Upper', 'Preview', 200)
-        cv2.setTrackbarPos('Lower', 'Preview')
+        cv2.setTrackbarPos('Lower', 'Preview', 100)
 
     def read_trackbars(self):
         """Read trackbar values"""
