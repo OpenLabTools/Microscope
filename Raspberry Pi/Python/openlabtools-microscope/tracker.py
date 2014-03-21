@@ -28,8 +28,6 @@ class WormTracker():
         self.camera = cv2.VideoCapture(camera)
         self.width = int(self.camera.get(cv2.cv.CV_CAP_PROP_FRAME_WIDTH))
         self.height = int(self.camera.get(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT))
-        self.video = cv2.VideoWriter('output.avi', -1, 1,
-                                     (self.width, self.height))
 
         #Kernel for morphological opening/closing operation
         self.kernel = np.ones((3, 3), np.uint8)
@@ -47,7 +45,6 @@ class WormTracker():
         cv2.createTrackbar('Step Interval', 'Preview', 0, 1000, self.nothing)
         cv2.createTrackbar('Opening Rounds', 'Preview', 0, 10, self.nothing)
         cv2.createTrackbar('Closing Rounds', 'Preview', 0, 10, self.nothing)
-        cv2.createTrackbar('Record', 'Preview', 0, 1, self.nothing)
         cv2.createTrackbar('Margin', 'Preview', 0, 200, self.nothing)
         cv2.createTrackbar('Step Size', 'Preview', 0, 20, self.nothing)
 
@@ -65,7 +62,6 @@ class WormTracker():
         self.step_interval = cv2.getTrackbarPos('Step Interval', 'Preview')
         self.opening_rounds = cv2.getTrackbarPos('Opening Rounds', 'Preview')
         self.closing_rounds = cv2.getTrackbarPos('Closing Rounds', 'Preview')
-        self.record = bool(cv2.getTrackbarPos('Record', 'Preview'))
         self.margin = cv2.getTrackbarPos('Margin', 'Preview')
         self.step_size = cv2.getTrackbarPos('Step Size', 'Preview')
 
@@ -153,8 +149,4 @@ class WormTracker():
             self.img = self.camera.read()
             self.find_worm()
             self.update_gui()
-
-            if self.record:
-                self.video.write(self.img)
-
             self.move_stage()
