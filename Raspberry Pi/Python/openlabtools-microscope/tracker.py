@@ -53,6 +53,7 @@ class WormTracker():
         cv2.createTrackbar('Lower', 'Preview', 0, 255, self.nothing)
         cv2.createTrackbar('PolyDP', 'Preview', 0, 1, self.nothing)
         cv2.createTrackbar('Precision', 'Preview', 0, 100, self.nothing)
+        cv2.createTrackbar('Adaptive', 'Preview', 0, 1, self.nothing)
 
         #Set default values
         cv2.setTrackbarPos('Threshold Value', 'Preview', 100)
@@ -78,12 +79,18 @@ class WormTracker():
         self.lower_canny = cv2.getTrackbarPos('Lower', 'Preview')
         self.poly_dp = bool(cv2.getTrackbarPos('PolyDP', 'Preview'))
         self.precision = cv2.getTrackbarPos('Precision', 'Preview')
+        self.adaptive = cv2.getTrackbarPos('Adaptive', 'Preview')
 
     def find_worm(self):
         """Threshold and contouring algorithm to find centroid of worm"""
         self.img_gray = cv2.cvtColor(self.img, cv2.COLOR_BGR2GRAY)
 
-        if self.canny:
+        if self.adaptive:
+            self.img_thesh = cv2.adaptiveThreshold(self.img, 255,
+                                                   cv2.ADAPTIVE_THRESH_MEAN_C,
+                                                   cv2.THRESH_BINARY_INV, 3,
+                                                   self.threshold)
+        elif self.canny:
             self.img_thresh = cv2.Canny(self.img, self.lower_canny,
                                         self.upper_canny)
         else:
