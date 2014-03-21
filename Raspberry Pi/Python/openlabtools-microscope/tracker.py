@@ -48,12 +48,17 @@ class WormTracker():
         cv2.createTrackbar('Margin', 'Preview', 0, 200, self.nothing)
         cv2.createTrackbar('Step Size', 'Preview', 0, 20, self.nothing)
         cv2.createTrackbar('Contour', 'Preview', 0, 1, self.nothing)
+        cv2.createTrackbar('Canny', 'Preview', 0, 1, self.nothing)
+        cv2.createTrackbar('Upper', 'Preview', 0, 255, self.nothing)
+        cv2.createTrackbar('Lower', 'Preview', 0, 255, self.nothing)
 
         #Set default values
         cv2.setTrackbarPos('Threshold Value', 'Preview', 100)
-        cv2.setTrackbarPos('Step Interval', 'Preview', 100)
+        cv2.setTrackbarPos('Step Interval', 'Preview', 500)
         cv2.setTrackbarPos('Margin', 'Preview', 100)
         cv2.setTrackbarPos('Step Size', 'Preview', 2)
+        cv2.setTrackbarPos('Upper', 'Preview', 200)
+        cv2.setTrackbarPos('Lower', 'Preview')
 
     def read_trackbars(self):
         """Read trackbar values"""
@@ -66,22 +71,29 @@ class WormTracker():
         self.margin = cv2.getTrackbarPos('Margin', 'Preview')
         self.step_size = cv2.getTrackbarPos('Step Size', 'Preview')
         self.draw_contour = bool(cv2.getTrackbarPos('Contour', 'Preview'))
+        self.canny = bool(cv2.getTrackbarPos('Canny', 'Preview'))
+        self.upper_canny = cv2.getTrackbarPos('Upper', 'Preview')
+        self.lower = cv2.getTrackbarPos('Lower', 'Preview')
 
     def find_worm(self):
         """Threshold and contouring algorithm to find centroid of worm"""
         self.img_gray = cv2.cvtColor(self.img, cv2.COLOR_BGR2GRAY)
 
-        #Threshold
-        ret, self.img_thresh = cv2.threshold(self.img_gray, self.threshold,
-                                             255, cv2.THRESH_BINARY_INV)
+        if self.canny:
+            self.img_thresh = cv2.Canny(self.img, self.lower_canny,
+                                        self.upper_canny)
+        else:
+            #Threshold
+            ret, self.img_thresh = cv2.threshold(self.img_gray, self.threshold,
+                                                 255, cv2.THRESH_BINARY_INV)
 
-        for i in range(self.opening_rounds):
-            self.img_thresh = cv2.erode(self.img_thresh, self.kernel, 1)
-            self.img_thresh = cv2.dilate(self.img_thresh, self.kernel, 1)
+            for i in range(self.opening_rounds):
+                self.img_thresh = cv2.erode(self.img_thresh, self.kernel, 1)
+                self.img_thresh = cv2.dilate(self.img_thresh, self.kernel, 1)
 
-        for i in range(self.closing_rounds):
-            self.img_thresh = cv2.dilate(self.img_thresh, self.kernel, 1)
-            self.img_thresh = cv2.erode(self.img_thresh, self.kernel, 1)
+            for i in range(self.closing_rounds):
+                self.img_thresh = cv2.dilate(self.img_thresh, self.kernel, 1)
+                self.img_thresh = cv2.erode(self.img_thresh, self.kernel, 1)
 
         #Copy image to allow displaying later
         img_contour = self.img_thresh.copy()
