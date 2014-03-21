@@ -128,8 +128,7 @@ class WormTracker():
             self.img = cv2.cvtColor(self.img_thresh, cv2.COLOR_GRAY2BGR)
 
         if self.draw_contour:
-            self.img = cv2.drawContours(self.img, [self.worm],
-                                        -1, (255, 0, 0), 1)
+            cv2.drawContours(self.img, [self.worm], -1, (255, 0, 0), 2)
 
         #Draw markers for centroid and boundry
         cv2.circle(self.img, (self.x, self.y), 5, (0, 0, 255), -1)
