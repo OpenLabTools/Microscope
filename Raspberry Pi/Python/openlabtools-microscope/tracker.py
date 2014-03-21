@@ -72,8 +72,8 @@ class WormTracker():
         self.img_gray = cv2.cvtColor(self.img, cv2.COLOR_BGR2GRAY)
 
         #Threshold
-        ret, img_thresh = cv2.threshold(self.img_gray, self.threshold, 255,
-                                        cv2.THRESH_BINARY_INV)
+        ret, self.img_thresh = cv2.threshold(self.img_gray, self.threshold,
+                                             255, cv2.THRESH_BINARY_INV)
 
         for i in range(self.opening_rounds):
             self.img_thresh = cv2.erode(self.img_thresh, self.kernel, 1)
@@ -84,7 +84,7 @@ class WormTracker():
             self.img_thresh = cv2.erode(self.img_thresh, self.kernel, 1)
 
         #Copy image to allow displaying later
-        img_contour = img_thresh.copy()
+        img_contour = self.img_thresh.copy()
         contours, hierarchy = cv2.findContours(img_contour, cv2.RETR_TREE,
                                                cv2.CHAIN_APPROX_NONE)
 
