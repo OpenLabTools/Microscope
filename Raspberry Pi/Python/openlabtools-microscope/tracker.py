@@ -146,7 +146,7 @@ class WormTracker():
         while True:
 
             self.read_trackbars()
-            self.img = self.camera.read()
+            ret, self.img = self.camera.read()
             self.find_worm()
             self.update_gui()
             self.move_stage()
