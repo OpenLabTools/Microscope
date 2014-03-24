@@ -36,6 +36,10 @@ class WormTracker():
         self.microscope.set_ring_colour('FF0000')
         self.last_step_time = datetime.now()
 
+    def change_kernel(self, size):
+        size = size*2 + 1
+        self.kernel = np.ones((size, size), np.uint8)
+
     def create_gui(self):
         """"Defines the HighGUI elements """
         cv2.namedWindow('Preview')
@@ -47,11 +51,12 @@ class WormTracker():
         cv2.createTrackbar('Step Size', 'Preview', 0, 20, self.nothing)
         cv2.createTrackbar('Contour', 'Preview', 0, 1, self.nothing)
         cv2.createTrackbar('Adaptive', 'Preview', 0, 1, self.nothing)
-        cv2.createTrackbar('Adaptive Value', 'Preview', 0, 20, self.nothing)
-        cv2.createTrackbar('Adaptive Size', 'Preview', 3, 21, self.nothing)
+        cv2.createTrackbar('Adaptive Value', 'Preview', 0, 40, self.nothing)
+        cv2.createTrackbar('Adaptive Size', 'Preview', 1, 40, self.nothing)
         cv2.createTrackbar('Gaussian', 'Preview', 0, 1, self.nothing)
-        cv2.createTrackbar('Morph Operator', 'Preview', 0, 2, self.nothing)
-        cv2.createTrackbar('Morph Iterations', 'Preview', 1, 20, self.nothing)
+        cv2.createTrackbar('Kernel Size', 'Preview', 1, 20, self.change_kernel)
+        cv2.createTrackbar('Opening', 'Preview', 0, 20, self.nothing)
+        cv2.createTrackbar('Closing', 'Preview', 0, 20, self.nothing)
 
         #Set default values
         cv2.setTrackbarPos('Threshold Value', 'Preview', 100)
@@ -73,8 +78,8 @@ class WormTracker():
         self.adaptive_value = cv2.getTrackbarPos('Adaptive Value', 'Preview')
         self.adaptive_size = cv2.getTrackbarPos('Adaptive Size', 'Preview')
         self.adaptive_gauss = bool(cv2.getTrackbarPos('Gaussian', 'Preview'))
-        self.morph = cv2.getTrackbarPos('Morph Operator', 'Preview')
-        self.morph_iter = cv2.getTrackbarPos('Morph Iterations', 'Preview')
+        self.opening = cv2.getTrackbarPos('Opening', 'Preview')
+        self.closing = cv2.getTrackbarPos('Closing', 'Preview')
 
     def find_worm(self):
         """Threshold and contouring algorithm to find centroid of worm"""
@@ -99,15 +104,17 @@ class WormTracker():
             ret, self.img_thresh = cv2.threshold(self.img_gray, self.threshold,
                                                  255, cv2.THRESH_BINARY_INV)
 
-        if self.morph != 0:
-            if self.morph == 1:
-                operator = cv2.MORPH_OPEN
-            else:
-                operator = cv2.MORPH_CLOSE
+        if self.opening != 0:
             self.img_thresh = cv2.morphologyEx(self.img_thresh,
-                                               operator,
+                                               cv2.MORPH_OPEN,
                                                self.kernel,
-                                               iterations=self.morph_iter)
+                                               iterations=self.opening)
+
+        if self.closing != 0:
+            self.img_thresh = cv2.morphologyEx(self.img_thresh,
+                                               cv2.MORPH_CLOSE,
+                                               self.kernel,
+                                               iterations=self.closing)
 
         #Copy image to allow displaying later
         img_contour = self.img_thresh.copy()
