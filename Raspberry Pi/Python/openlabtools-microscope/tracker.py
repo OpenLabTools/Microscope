@@ -51,6 +51,7 @@ class WormTracker():
         cv2.createTrackbar('Adaptive', 'Preview', 0, 1, self.nothing)
         cv2.createTrackbar('Adaptive Value', 'Preview', 0, 20, self.nothing)
         cv2.createTrackbar('Adaptive Size', 'Preview', 3, 21, self.nothing)
+        cv2.createTrackbar('Gaussian', 'Preview', 0, 1, self.nothing)
 
         #Set default values
         cv2.setTrackbarPos('Threshold Value', 'Preview', 100)
@@ -73,16 +74,24 @@ class WormTracker():
         self.adaptive = bool(cv2.getTrackbarPos('Adaptive', 'Preview'))
         self.adaptive_value = cv2.getTrackbarPos('Adaptive Value', 'Preview')
         self.adaptive_size = cv2.getTrackbarPos('Adaptive Size', 'Preview')
+        self.adaptive_gauss = bool(cv2.getTrackbarPos('Gaussian', 'Preview'))
 
     def find_worm(self):
         """Threshold and contouring algorithm to find centroid of worm"""
         self.img_gray = cv2.cvtColor(self.img, cv2.COLOR_BGR2GRAY)
 
         if self.adaptive:
+            size = self.adaptive_size*2 + 1
+
+            if self.adaptive_gauss:
+                mode = cv2.ADAPTIVE_THRESH_MEAN_C
+            else:
+                mode = cv2.ADAPTIVE_THRESH_GAUSSIAN_C
+
             self.img_thresh = cv2.adaptiveThreshold(self.img_gray, 255,
-                                                    cv2.ADAPTIVE_THRESH_MEAN_C,
+                                                    mode,
                                                     cv2.THRESH_BINARY_INV,
-                                                    self.adaptive_size,
+                                                    size,
                                                     self.adaptive_value)
         else:
             #Threshold
