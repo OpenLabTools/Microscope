@@ -94,27 +94,20 @@ class WormTracker():
                                                     size,
                                                     self.adaptive_value)
 
-            if self.morph != 0:
-                if self.morph == 1:
-                    operator = cv2.MORPH_OPEN
-                else:
-                    operator = cv2.MORPH_CLOSE
-                self.img_thresh = cv2.morphologyEx(self.img_thresh,
-                                                   operator,
-                                                   self.kernel,
-                                                   self.morph_iter)
         else:
             #Threshold
             ret, self.img_thresh = cv2.threshold(self.img_gray, self.threshold,
                                                  255, cv2.THRESH_BINARY_INV)
 
-            for i in range(self.opening_rounds):
-                self.img_thresh = cv2.erode(self.img_thresh, self.kernel, 1)
-                self.img_thresh = cv2.dilate(self.img_thresh, self.kernel, 1)
-
-            for i in range(self.closing_rounds):
-                self.img_thresh = cv2.dilate(self.img_thresh, self.kernel, 1)
-                self.img_thresh = cv2.erode(self.img_thresh, self.kernel, 1)
+        if self.morph != 0:
+            if self.morph == 1:
+                operator = cv2.MORPH_OPEN
+            else:
+                operator = cv2.MORPH_CLOSE
+            self.img_thresh = cv2.morphologyEx(self.img_thresh,
+                                               operator,
+                                               self.kernel,
+                                               iterations=self.morph_iter)
 
         #Copy image to allow displaying later
         img_contour = self.img_thresh.copy()
