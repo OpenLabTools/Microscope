@@ -50,7 +50,7 @@ class WormTracker():
         cv2.createTrackbar('Contour', 'Preview', 0, 1, self.nothing)
         cv2.createTrackbar('Adaptive', 'Preview', 0, 1, self.nothing)
         cv2.createTrackbar('Adaptive Value', 'Preview', 0, 20, self.nothing)
-        cv2.createTrackbar('Adaptive Size', 'Preivew', 3, 21, self.nothing)
+        cv2.createTrackbar('Adaptive Size', 'Preview', 3, 21, self.nothing)
 
         #Set default values
         cv2.setTrackbarPos('Threshold Value', 'Preview', 100)
