@@ -74,7 +74,7 @@ class WormTracker():
         self.adaptive_size = cv2.getTrackbarPos('Adaptive Size', 'Preview')
         self.adaptive_gauss = bool(cv2.getTrackbarPos('Gaussian', 'Preview'))
         self.morph = cv2.getTrackbarPos('Morph Operator', 'Preview')
-        self.morh_iter = cv2.getTrackbarPos('Morph Iterations', 'Preview')
+        self.morph_iter = cv2.getTrackbarPos('Morph Iterations', 'Preview')
 
     def find_worm(self):
         """Threshold and contouring algorithm to find centroid of worm"""
