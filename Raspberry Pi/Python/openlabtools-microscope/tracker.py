@@ -48,11 +48,6 @@ class WormTracker():
         cv2.createTrackbar('Margin', 'Preview', 0, 200, self.nothing)
         cv2.createTrackbar('Step Size', 'Preview', 0, 20, self.nothing)
         cv2.createTrackbar('Contour', 'Preview', 0, 1, self.nothing)
-        cv2.createTrackbar('Canny', 'Preview', 0, 1, self.nothing)
-        cv2.createTrackbar('Upper', 'Preview', 0, 255, self.nothing)
-        cv2.createTrackbar('Lower', 'Preview', 0, 255, self.nothing)
-        cv2.createTrackbar('PolyDP', 'Preview', 0, 1, self.nothing)
-        cv2.createTrackbar('Precision', 'Preview', 0, 100, self.nothing)
         cv2.createTrackbar('Adaptive', 'Preview', 0, 1, self.nothing)
 
         #Set default values
@@ -60,8 +55,6 @@ class WormTracker():
         cv2.setTrackbarPos('Step Interval', 'Preview', 500)
         cv2.setTrackbarPos('Margin', 'Preview', 100)
         cv2.setTrackbarPos('Step Size', 'Preview', 2)
-        cv2.setTrackbarPos('Upper', 'Preview', 200)
-        cv2.setTrackbarPos('Lower', 'Preview', 100)
 
     def read_trackbars(self):
         """Read trackbar values"""
@@ -74,10 +67,6 @@ class WormTracker():
         self.margin = cv2.getTrackbarPos('Margin', 'Preview')
         self.step_size = cv2.getTrackbarPos('Step Size', 'Preview')
         self.draw_contour = bool(cv2.getTrackbarPos('Contour', 'Preview'))
-        self.canny = bool(cv2.getTrackbarPos('Canny', 'Preview'))
-        self.upper_canny = cv2.getTrackbarPos('Upper', 'Preview')
-        self.lower_canny = cv2.getTrackbarPos('Lower', 'Preview')
-        self.poly_dp = bool(cv2.getTrackbarPos('PolyDP', 'Preview'))
         self.precision = cv2.getTrackbarPos('Precision', 'Preview')
         self.adaptive = cv2.getTrackbarPos('Adaptive', 'Preview')
 
@@ -90,9 +79,6 @@ class WormTracker():
                                                    cv2.ADAPTIVE_THRESH_MEAN_C,
                                                    cv2.THRESH_BINARY_INV, 3,
                                                    self.threshold)
-        elif self.canny:
-            self.img_thresh = cv2.Canny(self.img_gray, self.lower_canny,
-                                        self.upper_canny)
         else:
             #Threshold
             ret, self.img_thresh = cv2.threshold(self.img_gray, self.threshold,
@@ -118,10 +104,6 @@ class WormTracker():
             if area > worm_area:
                 self.worm = contour
                 worm_area = area
-
-        if self.poly_dp:
-            worm = cv2.approxPolyDP(self.worm, self.precision, True)
-            self.worm = worm
 
         #Compute the centroid of the worm contour
         moments = cv2.moments(self.worm)
