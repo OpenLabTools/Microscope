@@ -42,7 +42,7 @@ class WormTracker():
 
         self.last_frame = cv2.getTickCount()
 
-        self.worm_spline = np.zeros((1000, 1, 2))
+        self.worm_spline = np.zeros((1001, 1, 2))
 
     def change_kernel(self, size):
         size = size*2 + 1
