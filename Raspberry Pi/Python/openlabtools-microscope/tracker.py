@@ -1,6 +1,10 @@
 from datetime import datetime
+
 import numpy as np
+from scipy import interpolate
+
 import cv2
+
 from interface import Microscope
 
 
@@ -38,6 +42,8 @@ class WormTracker():
 
         self.last_frame = cv2.getTickCount()
 
+        self.worm_spline = np.zeros((1000, 1, 2))
+
     def change_kernel(self, size):
         size = size*2 + 1
         self.kernel = np.ones((size, size), np.uint8)
@@ -59,6 +65,8 @@ class WormTracker():
         cv2.createTrackbar('Kernel Size', 'Preview', 1, 20, self.change_kernel)
         cv2.createTrackbar('Opening', 'Preview', 0, 20, self.nothing)
         cv2.createTrackbar('Closing', 'Preview', 0, 20, self.nothing)
+        cv2.createTrackbar('Skeleton', 'Preview', 0, 1, self.nothing)
+        cv2.createTrackbar('Smoothing', 'Preview', 0, 1000, self.nothing)
 
         #Set default values
         cv2.setTrackbarPos('Threshold Value', 'Preview', 100)
@@ -82,6 +90,8 @@ class WormTracker():
         self.adaptive_gauss = bool(cv2.getTrackbarPos('Gaussian', 'Preview'))
         self.opening = cv2.getTrackbarPos('Opening', 'Preview')
         self.closing = cv2.getTrackbarPos('Closing', 'Preview')
+        self.skeleton = bool(cv2.getTrackbarPos('Skeleton', 'Preview'))
+        self.smoothing = cv2.getTrackbarPos('Smoothing', 'Preview')
 
     def find_worm(self):
         """Threshold and contouring algorithm to find centroid of worm"""
@@ -136,6 +146,42 @@ class WormTracker():
         self.x = int(moments['m10']/moments['m00'])
         self.y = int(moments['m01']/moments['m00'])
 
+    def skeletonise(self):
+        x = self.worm[:, 0, 0]
+        y = self.worm[:, 0, 1]
+
+        tck, u = interpolate.splrep([x, y], per=True, s=self.smoothing)
+
+        points = np.arange(0, 1.001, 0.001)
+
+        spline = interpolate.splev(points, tck, der=0)
+        x = spline[0]
+        y = spline[1]
+        self.worm_spline[:, 0, 1] = x
+        self.worm_spline[:, 0, 2] = y
+
+        d = interpolate.splev(points, tck, der=1)
+        dx = d[0]
+        dy = d[1]
+
+        dd = interpolate.splev(points, tck, der=2)
+        ddx = dd[0]
+        ddy = dd[1]
+
+        k = dx*ddy - dy*ddx
+        k = np.absolute(k)
+        k = k/((dx**2 + dy**2)**1.5)
+
+        tail_n = np.argmax(k)
+        k[tail_n-250:tail_n+250] = 0
+        head_n = np.argmax(k)
+
+        self.tail.x = x[tail_n]
+        self.tail.y = y[tail_n]
+
+        self.head.x = x[head_n]
+        self.head.y = y[head_n]
+
     def move_stage(self):
         now = datetime.now()
         elapsed_time = ((now - self.last_step_time).microseconds)/1000
@@ -163,7 +209,11 @@ class WormTracker():
             self.img = cv2.cvtColor(self.img_thresh, cv2.COLOR_GRAY2BGR)
 
         if self.draw_contour:
-            cv2.drawContours(self.img, [self.worm], -1, (255, 0, 0), 2)
+            if self.skeleton:
+                cv2.drawContours(self.img, [self.worm_spline],
+                                 -1, (255, 0, 0), 2)
+            else:
+                cv2.drawContours(self.img, [self.worm], -1, (255, 0, 0), 2)
 
         #Draw markers for centroid and boundry
         cv2.circle(self.img, (self.x, self.y), 5, (0, 0, 255), -1)
@@ -171,6 +221,13 @@ class WormTracker():
                       (self.width-self.margin, self.height-self.margin),
                       (0, 255, 0),
                       2)
+
+        #If skeletonise draw markers for head and tail
+        if self.skeleton:
+            cv2.circle(self.img, (self.tail.x, self.tail.y),
+                       5, (0, 255, 255), -1)
+            cv2.circle(self.img, (self.head.x, self.head.y),
+                       5, (255, 255, 0), -1)
 
         #Show image
         cv2.imshow('Preview', self.img)
@@ -188,6 +245,10 @@ class WormTracker():
             self.read_trackbars()
             ret, self.img = self.camera.read()
             self.find_worm()
+
+            if self.skeleton:
+                self.skeletonise()
+
             self.update_gui()
             self.move_stage()
 
