@@ -152,7 +152,8 @@ class WormTracker():
         x_in = self.worm[:, 0, 0]
         y_in = self.worm[:, 0, 1]
 
-        tck, u = interpolate.splprep([x_in, y_in], per=True, s=self.smoothing)
+        tck, u = interpolate.splprep([x_in, y_in], per=True, s=self.smoothing,
+                                     quiet=True)
 
         points = np.arange(0, 1.001, 0.001)
 
