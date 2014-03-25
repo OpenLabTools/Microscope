@@ -178,7 +178,7 @@ class WormTracker():
         k = k/((dx**2 + dy**2)**1.5)
 
         tail_n = np.argmax(k)
-        k[tail_n-250:tail_n+250] = 0
+        k[tail_n-125:tail_n+125] = 0
         head_n = np.argmax(k)
 
         self.tail[0] = int(x[tail_n])
