@@ -178,11 +178,11 @@ class WormTracker():
         k[tail_n-250:tail_n+250] = 0
         head_n = np.argmax(k)
 
-        self.tail[0] = x[tail_n]
-        self.tail[1] = y[tail_n]
+        self.tail[0] = int(x[tail_n])
+        self.tail[1] = int(y[tail_n])
 
-        self.head[0] = x[head_n]
-        self.head[1] = y[head_n]
+        self.head[0] = int(x[head_n])
+        self.head[1] = int(y[head_n])
 
     def move_stage(self):
         now = datetime.now()
