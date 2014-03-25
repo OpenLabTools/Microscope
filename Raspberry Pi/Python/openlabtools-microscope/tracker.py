@@ -36,8 +36,7 @@ class WormTracker():
         self.microscope.set_ring_colour('FF0000')
         self.last_step_time = datetime.now()
 
-        self.time_steps = np.zeros(10)
-        self.last_frame = datetime.now()
+        self.last_frame = cv2.getTickCount()
 
     def change_kernel(self, size):
         size = size*2 + 1
@@ -192,10 +191,8 @@ class WormTracker():
             self.update_gui()
             self.move_stage()
 
-            now = datetime.now()
-            timestep = (now - self.last_frame).microseconds
-            self.time_steps = np.append(self.time_steps[1:], timestep)
-
-            fps = 100000/np.sum(self.time_steps)
-            print fps
+            now = cv2.getTickCount()
+            fps = cv2.getTickFrequency()/(now - self.last_frame)
             self.last_frame = now
+
+            print fps
