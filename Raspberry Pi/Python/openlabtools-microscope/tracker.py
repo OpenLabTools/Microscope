@@ -32,6 +32,8 @@ class WormTracker():
         self.camera = cv2.VideoCapture(camera)
         self.width = int(self.camera.get(cv2.cv.CV_CAP_PROP_FRAME_WIDTH))
         self.height = int(self.camera.get(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT))
+        self.camera.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, self.width)
+        self.camera.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, self.height)
 
         #Kernel for morphological opening/closing operation
         self.kernel = np.ones((3, 3), np.uint8)
