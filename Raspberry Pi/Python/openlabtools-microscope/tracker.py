@@ -44,7 +44,7 @@ class WormTracker():
 
         self.last_frame = cv2.getTickCount()
 
-        self.worm_spline = np.zeros((1001, 1, 2))
+        self.worm_spline = np.zeros((1001, 1, 2), dtype=np.int)
         self.tail = np.zeros((2,), dtype=np.int)
         self.head = np.zeros((2,), dtype=np.int)
 
