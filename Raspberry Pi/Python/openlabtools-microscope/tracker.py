@@ -43,6 +43,8 @@ class WormTracker():
         self.last_frame = cv2.getTickCount()
 
         self.worm_spline = np.zeros((1001, 1, 2))
+        self.tail = np.zeros(2)
+        self.head = np.zeros(2)
 
     def change_kernel(self, size):
         size = size*2 + 1
@@ -176,11 +178,11 @@ class WormTracker():
         k[tail_n-250:tail_n+250] = 0
         head_n = np.argmax(k)
 
-        self.tail.x = x[tail_n]
-        self.tail.y = y[tail_n]
+        self.tail[0] = x[tail_n]
+        self.tail[1] = y[tail_n]
 
-        self.head.x = x[head_n]
-        self.head.y = y[head_n]
+        self.head[0] = x[head_n]
+        self.head[1] = y[head_n]
 
     def move_stage(self):
         now = datetime.now()
@@ -224,9 +226,9 @@ class WormTracker():
 
         #If skeletonise draw markers for head and tail
         if self.skeleton:
-            cv2.circle(self.img, (self.tail.x, self.tail.y),
+            cv2.circle(self.img, (self.tail[0], self.tail[1]),
                        5, (0, 255, 255), -1)
-            cv2.circle(self.img, (self.head.x, self.head.y),
+            cv2.circle(self.img, (self.head[0], self.head[1]),
                        5, (255, 255, 0), -1)
 
         #Show image
