@@ -198,3 +198,4 @@ class WormTracker():
 
             fps = 100000/np.sum(self.time_steps)
             print fps
+            self.last_frame = now
