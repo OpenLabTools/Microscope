@@ -157,8 +157,8 @@ class WormTracker():
         spline = interpolate.splev(points, tck, der=0)
         x = spline[0]
         y = spline[1]
-        self.worm_spline[:, 0, 1] = x
-        self.worm_spline[:, 0, 2] = y
+        self.worm_spline[:, 0, 0] = x
+        self.worm_spline[:, 0, 1] = y
 
         d = interpolate.splev(points, tck, der=1)
         dx = d[0]
