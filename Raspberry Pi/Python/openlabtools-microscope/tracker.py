@@ -38,17 +38,21 @@ class WormTracker():
         #Kernel for morphological opening/closing operation
         self.kernel = np.ones((3, 3), np.uint8)
 
+        #Variables for controlling stage
         self.microscope = Microscope(serial_port)
         self.microscope.set_ring_colour('FF0000')
         self.last_step_time = datetime.now()
 
+        #Use for FPS calculation
         self.last_frame = cv2.getTickCount()
 
+        #Skeltonisation
         self.worm_spline = np.zeros((1001, 1, 2), dtype=np.int)
         self.tail = np.zeros((2,), dtype=np.int)
         self.head = np.zeros((2,), dtype=np.int)
 
     def change_kernel(self, size):
+        '''Generate new kernel patch for morphological opening/closing'''
         size = size*2 + 1
         self.kernel = np.ones((size, size), np.uint8)
 
@@ -102,6 +106,7 @@ class WormTracker():
         self.img_gray = cv2.cvtColor(self.img, cv2.COLOR_BGR2GRAY)
 
         if self.adaptive:
+            #Perform adaptive thresholding
             size = self.adaptive_size*2 + 1
 
             if self.adaptive_gauss:
@@ -116,17 +121,19 @@ class WormTracker():
                                                     self.adaptive_value)
 
         else:
-            #Threshold
+            #Simple Threshold
             ret, self.img_thresh = cv2.threshold(self.img_gray, self.threshold,
                                                  255, cv2.THRESH_BINARY_INV)
 
         if self.opening != 0:
+            #Morphological Opening
             self.img_thresh = cv2.morphologyEx(self.img_thresh,
                                                cv2.MORPH_OPEN,
                                                self.kernel,
                                                iterations=self.opening)
 
         if self.closing != 0:
+            #Morphological Closing
             self.img_thresh = cv2.morphologyEx(self.img_thresh,
                                                cv2.MORPH_CLOSE,
                                                self.kernel,
@@ -151,6 +158,7 @@ class WormTracker():
         self.y = int(moments['m01']/moments['m00'])
 
     def skeletonise(self):
+        '''Perform skeletonisation and determine location of head and tail'''
         x_in = self.worm[:, 0, 0]
         y_in = self.worm[:, 0, 1]
 
@@ -188,6 +196,7 @@ class WormTracker():
         self.head[1] = int(y[head_n])
 
     def move_stage(self):
+        '''Move the stage if the worm gets near the edge of image'''
         now = datetime.now()
         elapsed_time = ((now - self.last_step_time).microseconds)/1000
 
@@ -210,6 +219,7 @@ class WormTracker():
                 print 'Moving Down'
 
     def update_gui(self):
+        '''Update GUI with image and draw feature markers'''
         if self.show_threshold:
             self.img = cv2.cvtColor(self.img_thresh, cv2.COLOR_GRAY2BGR)
 
@@ -257,6 +267,7 @@ class WormTracker():
             self.update_gui()
             self.move_stage()
 
+            #FPS calculations
             now = cv2.getTickCount()
             fps = cv2.getTickFrequency()/(now - self.last_frame)
             self.last_frame = now
