@@ -22,6 +22,7 @@ void Lighting::begin()
 {
   ring.begin();
   pinMode(STAGE_LED, OUTPUT);
+  setStageLEDBrightness(255);
 }
 
 void Lighting::loop()
@@ -43,7 +44,7 @@ void Lighting::setRingBrightness(uint8_t b)
 
 void Lighting::setStageLEDBrightness(uint8_t b)
 {
-  analogWrite(STAGE_LED, b);
+  //analogWrite(DAC0, b);
 }
 
 

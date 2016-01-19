@@ -1,0 +1,219 @@
+% Tutorial 1:
+% Programs descriptions
+
+
+
+\documentclass[a4paper]{article}
+
+\usepackage{hyperref}
+\usepackage[ruled,noend,vlined]{algorithm2e}
+\usepackage{listings}
+\usepackage{pifont}
+\usepackage{indentfirst}
+
+\begin{document}
+	
+	\title{Automation Tutorial 1: Algorithms and Formulas}
+	\date{29th August 2013}
+	\author{Marco Selvi}
+	\maketitle
+	
+	
+	\section*{Aims}
+	
+		The main aim of the \emph{Automation} set of tutorials is to explain how to implement automation in the \textbf{microscope project} of the \textbf{OpenLabTools} initiative.
+		
+		In particular, here in \emph{Tutorial 1} we will present the concepts, algorithms and formulas used in the auto-focusing program available in the OpenLabTools GitHub \href{https://github.com/OpenLabTools/Microscope}{repository}. 
+		We will then give a brief overview of other possibilities within this project.
+	
+	
+	\section*{Concepts}
+	
+		We now make a brief overview of the fundamental concepts necessary for the correct operation of the microscope. 
+		Here we will maintain a rather abstract approach. 
+		For a more detailed source code description please refer to the \emph{Automation Tutorial 2}.
+	
+	\subsection*{\indent{Serial Ports}}
+		
+			One of the fundamental things to know in order to implement full automation through C code is \textbf{serial communication} with the Arduino board used (for the Arduino tutorials check \href{https://github.com/OpenLabTools/Microscope/tree/master/Arduino}{here}). 
+			A simple USB connection between the Raspberry Pi and the Arduino board is sufficient to provide serial connection. 
+			The arduino is generally associated with the device \textbf{ttyUSB0}, unless another device is already associated with it. 
+			To check, simply type
+		
+		\begin{quote}
+			ls /dev
+		\end{quote}
+		
+			\noindent
+			in a terminal window. 
+			Once you know what device to connect to, you can test your serial communication with Python by simply using
+		
+		\begin{quote}
+			import serial\newline
+			ser = serial.Serial(`name\_{}of\_{}device')
+		\end{quote}
+		
+			Now you can freely communicate to the Arduino by writing into the serial port, and reading outputs from it. 
+			Many ways to do so exist, depending on the libraries and the programming languages used.
+			We will be programming in C++ and using the \emph{Boost Asio} library whose description can be found \href{http://www.boost.org/doc/libs/1_54_0/doc/html/boost_asio.html}{here}. 
+			Details of how this is done are in the \emph{Automation Tutorial 2} document.
+		
+	\subsection*{\indent{Image Processing}}
+		
+			Another rather obviously important part of our automation routines is image processing. 
+			Again many options exist, depending on the language chosen. 
+			The Python PIL (Python Imaging Library) for example is a very versatile if a little slow imaging library that would serve anyone's purpose.
+			Here however we will be using the \href{http://cimg.sourceforge.net/}{CImg Library}, optimized for C++ and very portable.
+			
+			Image processing is the core of any program that exploits the full functionality of our microscope. 
+			Depending on what we wish to do, it can be a very complex process and of non-trivial implementation. 
+			It can also be highly CPU-demanding, especially with high-quality images.\newline{}
+			The Raspberry Pi may be a fantastic computer for real-time control and development of projects, and it does indeed provide the perfect platform for the electronics of our microscope.
+			However, due to its limited processing power, it is not the ideal machine for heavy-duty tasks like image processing of large pictures.
+			For these reasons we aim to use a reasonably efficient library, and we also tried to keep the resolution of the images rather low wherever possible.
+			
+			We will go into more details later, but it should suffice to know for now that the library is used only for the most basic tasks of opening a \emph{jpg} file and displaying images. 
+			All other image processing routines are custom built to save on computational time, with the aim of speeding up the program.
+	
+	\subsection*{\indent{Motor Control and Serial Commands}}
+		
+			Motor control is what concerns the mechanics of the microscope's stage.
+			The job of actually controlling the motors and interpreting the commands sent through the serial port is done by the Arduino board, for which we suggest reading through the Arduino tutorials.
+			For the mechanical structure of the microscope itself, read the Mechanics Tutorials.
+			What we are interested in at the \emph{automation} stage is what the mechanics can actually do: namely, for auto-focusing, the fact that we can control the vertical movement of the stage with commands sent to the Arduino through the serial port.\newline{}
+			Other programs might need to make use of the horizontal stage control, also available through the serial commands. Other commands exist to control lighting, read vertical positions, and many more can be added to cover any functionality that future development may make necessary.
+	
+	
+	\section*{Algorithms and Formulas}
+	
+		In this section we will give a theoretical description of all the algorithms used in writing the various programs.
+		Of particular interest are the algorithm for auto-focusing and the algorithm for edge detection used in a sample program on image processing.
+	
+	\subsection*{\indent{Canny Edge Detection}}
+		
+			The Canny Edge Detection is a rather advanced and functional edge detection algorithm for pictures.
+			It is a perfect example of image processing implementation, and we will briefly explain here the algorithm on which it is based.
+			For detailed reference to the code please see \href{https://github.com/OpenLabTools/Microscope/tree/master/Raspberry\%20Pi}{here}.
+			
+			This edge detection works in the following way:
+		
+		\vspace{12pt}
+		\begin{algorithm}[H]
+			\dontprintsemicolon
+			\KwData{Image to be analysed, in our case a .jpg file}
+			\KwResult{Edges of said image}
+			
+			\Begin
+			{
+				\If{Image not in grayscale}
+				{
+					Turn image to grayscale\;
+				}
+				\BlankLine
+				Convolve image with smoothing matrix (to eliminate artifacts)\;
+				Calculate gradient of intensity associated with each pixel\;{}
+				\BlankLine
+				Select edges:\\
+				{
+					\If{gradient $<$ lower threshold}
+					{Turn pixel black\;}
+					\If{lower threshold $<$ gradient $<$ higher threshold}
+					{Turn pixel grey $\rightarrow$ minor edges\;}
+					\If{gradient $>$ higher threshold}
+					{Turn pixel white $\rightarrow$ major edges\;}
+				}
+				\BlankLine
+				Connect edges:\\	
+				{
+					\eIf{minor edge is connected to major edges}
+					{Turn this minor edge into major edge\;}
+					{Discard pixel\;}
+				}
+			}
+			\caption{Canny Edge Detection}				
+		\end{algorithm}
+		\vspace{12pt}
+		
+			The algorithm is rather self explanatory, but I would suggest to read quickly through the commented code if you are interested in seeing how this algorithm is implemented, or refer to the \emph{Automation Tutorial 2}.
+	
+	\subsection*{\indent{Auto-Focusing}}
+		
+			The auto-focusing routine is rather more complex, and separated in sub-routines that implement the various parts of the program needed for the whole to work.
+			We will here describe only the full and automanted focusing program, while the various subroutines are described in \emph{Automation Tutorial 2}.
+			
+			To understand the following algorithm, one must keep in mind that we are using a stepper motor for the vertical movement.
+			Thus all references to numbers of steps refer to steps associated with the stepper.
+			The initial and minimum number of steps has to be established depending on the objective in use, as with focal distances and focal depths decreasing we require an ever finer adjustment.
+			Also the computation of the focusing value for a picture is done through this formula:
+		
+		\[
+		F = \frac{1}{W H \mu} \sum (I(x,y) - \mu )^2
+		\]
+			\noindent
+			Here $\mu$ is the average intensity of the picture calculated over all the pixels, and $I$ is the intensity of pixel at position $(x,y)$ in the image.
+			$W$ and $H$ are width and height of the image (in pixels) respectively.
+			This formula simply represents a standard deviation weighted by the mean, and it is the most effective focusing parameter according to \href{http://www.researchgate.net/publication/4196112_Autofocusing_algorithm_selection_in_computer_microscopy/file/9c96051683d8b3a2d6.pdf}{this paper}.
+		
+		\vspace{12pt}
+		\begin{algorithm}[H]
+			\dontprintsemicolon
+			\Begin
+			{
+				Set number of steps to start with\;
+				\BlankLine
+				Execute sweep:\\
+				{
+				\Indp Take ten images at equal spacings from very close to the objective\;
+					Compute focusing value for each image\;
+					Move to position of image with max value\;				
+				}
+				\BlankLine
+				Execute tuning:\\
+				\While{number of steps $>$ minimum number of steps}
+				{
+					\BlankLine
+					Take picture\;
+					Compute focusing value for picture (F\_st)\;
+					\If{Last movement was up}
+					{Move up\;}
+					\Else
+					{Move down\;}
+					\BlankLine
+					Take picture\;
+					Compute focusing value for picture (F\_1)\;
+					\If{F\_1 $>$ F\_st}
+					{
+						Stay there\;
+						Repeat cycle\;
+					}
+					\Else
+					{	
+						Move in opposite direction (by twice number of steps)\;
+						Take picture\;
+						Compute focusing value for picture(F\_2)\;
+						\BlankLine
+						\If{F\_2 $>$ F\_st}
+						{
+							Stay there\;
+							Halve number of steps\;
+							Repeat cycle\;
+						}
+						\Else
+						{
+							Go back to central position\;
+							Halve number of steps\;
+							Repeat cycle\;
+						}
+					}
+				}
+				Focus position reached within minimum number of steps limitation\;
+			}
+			\caption{Focusing}
+		\end{algorithm}
+		\vspace{12pt}
+	
+	
+
+
+\end{document}
+
